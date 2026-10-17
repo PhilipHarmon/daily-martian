@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}The Daily Martian — Dashboard{% endblock %}
+{% block content %}
+
+<section class="apod-hero">
+  {% if apod.media_type == "video" %}
+    <a class="apod-media" href="{{ apod.url }}" target="_blank" rel="noopener">
+      {% if apod.thumbnail_url %}
+        <img src="{{ apod.thumbnail_url }}" alt="{{ apod.title }}" loading="eager" />
+      {% else %}
+        <div class="apod-video-fallback">▶ Watch today's video on apod.nasa.gov</div>
+      {% endif %}
+    </a>
+  {% else %}
+    <img class="apod-media" src="{{ apod.hdurl or apod.url }}" alt="{{ apod.title }}" loading="eager" />
+  {% endif %}
+  <div class="apod-caption">
+    <p class="kicker">Astronomy Picture of the Day · {{ apod.date }}</p>
+    <h1>{{ apod.title }}</h1>
+    <p class="apod-expl">{{ apod.explanation }}</p>
+  </div>
+</section>
+
+{% for strip in strips %}
+<section class="strip">
+  <div class="strip-head">
+    <h2>{{ strip.label }}</h2>
+    <a class="see-all" href="/gallery?q={{ strip.query | urlencode }}">See all →</a>
+  </div>
+  <div class="rail">
+    {% for item in strip["items"] %}
+      <a class="card" href="/gallery?q={{ strip.query | urlencode }}" title="{{ item.title }}">
+        <img src="{{ item.thumb_url }}" alt="{{ item.title }}" loading="lazy" />
+        <span class="card-title">{{ item.title }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<section class="topics-cta">
+  <h2>Explore Mars imagery</h2>
+  <div class="chips">
+    {% for label, query in topics %}
+      <a class="chip" href="/gallery?q={{ query | urlencode }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

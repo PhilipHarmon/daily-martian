@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Gallery — The Daily Martian{% endblock %}
+{% block content %}
+
+<section class="gallery-head">
+  <h1>Mars Gallery</h1>
+  <form class="search-form" action="/gallery" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search NASA's Mars imagery…" aria-label="Search Mars imagery" />
+    <button type="submit">Search</button>
+  </form>
+  <div class="chips">
+    {% for label, q in topics %}
+      <a class="chip{% if q == query %} active{% endif %}" href="/gallery?q={{ q | urlencode }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  <p class="result-meta">{{ total }} results for “{{ query }}” · page {{ page }} of {{ pages }}</p>
+</section>
+
+{% if items %}
+  <section class="grid">
+    {% for item in items %}
+      <button class="card photo-card"
+              data-large="{{ item.large_url }}"
+              data-title="{{ item.title }}"
+              data-date="{{ item.date }}"
+              data-desc="{{ item.description }}">
+        <img src="{{ item.medium_url }}" alt="{{ item.title }}" loading="lazy" />
+        <span class="card-title">{{ item.title }}</span>
+        <span class="card-date">{{ item.date }}</span>
+      </button>
+    {% endfor %}
+  </section>
+
+  <nav class="pager" aria-label="Pages">
+    {% if page > 1 %}
+      <a href="/gallery?q={{ query | urlencode }}&page={{ page - 1 }}">← Prev</a>
+    {% endif %}
+    {% if page < pages %}
+      <a href="/gallery?q={{ query | urlencode }}&page={{ page + 1 }}">Next →</a>
+    {% endif %}
+  </nav>
+{% else %}
+  <section class="empty">
+    <p>🛰️ No imagery found for “{{ query }}”.</p>
+    <p>Try another search — “mars rover”, “jezero crater”, “olympus mons”.</p>
+  </section>
+{% endif %}
+
+<div class="lightbox" id="lightbox" hidden>
+  <div class="lightbox-backdrop" data-close></div>
+  <figure class="lightbox-panel">
+    <button class="lightbox-close" data-close aria-label="Close">✕</button>
+    <img id="lb-img" src="" alt="" />
+    <figcaption>
+      <h2 id="lb-title"></h2>
+      <p class="lb-date" id="lb-date"></p>
+      <p class="lb-desc" id="lb-desc"></p>
+      <a id="lb-full" href="" target="_blank" rel="noopener">Open full-size →</a>
+    </figcaption>
+  </figure>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='gallery.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}The Daily Martian{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">🚀 The Daily Martian</a>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/gallery">Gallery</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <p>Imagery: <a href="https://images.nasa.gov" target="_blank" rel="noopener">NASA Image &amp; Video Library</a>
+    · APOD: <a href="https://apod.nasa.gov" target="_blank" rel="noopener">apod.nasa.gov</a></p>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
