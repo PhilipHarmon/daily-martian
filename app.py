@@ -55,10 +55,17 @@ def get_search(query, page):
 
 @app.route("/")
 def index():
-    apod = cached(db, "apod", APOD_TTL_HOURS, lambda: nasa.get_apod(NASA_API_KEY))
+    try:
+        apod = cached(db, "apod", APOD_TTL_HOURS, lambda: nasa.get_apod(NASA_API_KEY))
+    except Exception:
+        # Fresh database + NASA hiccup: show the page without the hero picture.
+        apod = None
     strips = []
     for label, query in TOPICS[:3]:
-        result = get_search(query, 1)
+        try:
+            result = get_search(query, 1)
+        except Exception:
+            result = {"items": [], "total_hits": 0}
         strips.append(
             {"label": label, "query": query, "items": result["items"][:8]}
         )
@@ -72,7 +79,10 @@ def gallery():
         page = max(1, int(request.args.get("page", 1)))
     except (TypeError, ValueError):
         page = 1
-    result = get_search(query, page)
+    try:
+        result = get_search(query, page)
+    except Exception:
+        result = {"items": [], "total_hits": 0}
     total = result["total_hits"]
     pages = max(1, -(-total // nasa.PAGE_SIZE))
     return render_template(
@@ -93,7 +103,10 @@ def api_search():
         page = max(1, int(request.args.get("page", 1)))
     except (TypeError, ValueError):
         page = 1
-    result = get_search(query, page)
+    try:
+        result = get_search(query, page)
+    except Exception:
+        return jsonify({"error": "NASA image search is temporarily unavailable"}), 503
     return jsonify(
         {
             "query": query,
@@ -106,9 +119,11 @@ def api_search():
 
 @app.route("/api/apod")
 def api_apod():
-    return jsonify(
-        cached(db, "apod", APOD_TTL_HOURS, lambda: nasa.get_apod(NASA_API_KEY))
-    )
+    try:
+        data = cached(db, "apod", APOD_TTL_HOURS, lambda: nasa.get_apod(NASA_API_KEY))
+    except Exception:
+        return jsonify({"error": "Astronomy Picture of the Day is temporarily unavailable"}), 503
+    return jsonify(data)
 
 
 @app.route("/api/topics")

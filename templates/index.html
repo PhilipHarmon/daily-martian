@@ -2,6 +2,7 @@
 {% block title %}The Daily Martian — Dashboard{% endblock %}
 {% block content %}
 
+{% if apod %}
 <section class="apod-hero">
   {% if apod.media_type == "video" %}
     <a class="apod-media" href="{{ apod.url }}" target="_blank" rel="noopener">
@@ -20,6 +21,15 @@
     <p class="apod-expl">{{ apod.explanation }}</p>
   </div>
 </section>
+{% else %}
+<section class="apod-hero apod-unavailable">
+  <div class="apod-caption">
+    <p class="kicker">Astronomy Picture of the Day</p>
+    <h1>Today's picture is on a coffee break</h1>
+    <p class="apod-expl">NASA's API didn't answer just now. The gallery and search below work fine — check back shortly.</p>
+  </div>
+</section>
+{% endif %}
 
 {% for strip in strips %}
 <section class="strip">

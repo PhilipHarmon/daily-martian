@@ -245,3 +245,19 @@ def test_missing_mongo_uri_fails_fast():
     )
     assert proc.returncode != 0
     assert "MONGO_URI" in proc.stderr
+
+
+def test_index_degrades_when_apod_fails(monkeypatch):
+    """Fresh DB + NASA outage: homepage still 200s with the fallback hero."""
+    appmod = _load_app(monkeypatch)
+
+    def boom_get(url, params=None, timeout=None):
+        raise requests.HTTPError("500 Server Error")
+
+    monkeypatch.setattr(appmod.nasa.requests, "get", boom_get)
+    client = appmod.app.test_client()
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert "coffee break" in resp.get_data(as_text=True)
+    api = client.get("/api/apod")
+    assert api.status_code == 503
